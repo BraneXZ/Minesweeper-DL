@@ -5,7 +5,6 @@ Created on Wed May 13 18:30:11 2020
 @author: Wash
 """
 import numpy as np
-from move import Move
 import copy
 
 class MineSweeperBoard():
@@ -16,7 +15,7 @@ class MineSweeperBoard():
         self.num_rows = num_rows
         self.num_cols = num_cols
         self.num_mines = num_mines
-    
+        
         self.new_game()
     
     def new_game(self):
@@ -36,6 +35,7 @@ class MineSweeperBoard():
         self.board = board
         self.player_board = copy.deepcopy(self.board)
         self.first_move = False
+        self.game_over = False
         
     def select_move(self, move):
         """
@@ -47,19 +47,53 @@ class MineSweeperBoard():
             return
         if not self.first_move:
             self._initialize_mines(move)
-        else:
-            self._select_move(move)
+        
+        self._select_move(move)
         
     def _select_move(self, move):
         """
         Utility function that selects the move and checks with the main board to see if the move is placed on a mine
         """
-        pass
+        select_row = move.select_row
+        select_col = move.select_col
+        board_val = self.board[select_row][select_col]
         
+        # Game over if the value is a mine
+        if board_val == 9:
+            self.game_over = True
+        
+        # Reveal its val if it has mines around it
+        elif board_val > 0:
+            self.player_board[select_row][select_col] = board_val
+        
+        # Expand the board if val is 0
+        else:
+            reveal_locations = [(select_row, select_col)]
+            neighbors = self.neighbors(select_row, select_col)
+            
+            while neighbors:
+                neighbor = neighbors.pop(0)
+                neighbor_row, neighbor_col = neighbor[0], neighbor[1]
+                neighbor_val = self.board[neighbor_row][neighbor_col]
+                
+                reveal_locations.append(neighbor)
+                
+                if neighbor_val == 0:
+                    neighbor_neighbors = self.neighbors(neighbor_row, neighbor_col)
+                    
+                    for nn in neighbor_neighbors:
+                        nn_row, nn_col = nn[0], nn[1]
+                        if (nn_row, nn_col) not in neighbors and (nn_row, nn_col) not in reveal_locations:
+                            neighbors.append( (nn_row, nn_col) )
+                            
+            for loc in reveal_locations:
+                loc_row, loc_col = loc[0], loc[1]
+                self.player_board[loc_row][loc_col] = self.board[loc_row][loc_col]
+                        
     def _initialize_mines(self, move):
         """
         Initialize mines after first move
-        Makes the move with 0 mines first and then randomly place mines on the board
+        Makes the first move valid and never have mines around it and then randomly place mines on the board
         """
         self.board[move.select_row][move.select_col] = 0
         
@@ -95,12 +129,8 @@ class MineSweeperBoard():
                         mine_count += 1
                 self.board[r][c] = mine_count
         
+        self.first_move = True
         
-    def _expand_neighbors(self, row, col):
-        """
-        Utility function that will expand the board when the point player makes has 0 mines around it
-        """
-        pass
     
     def neighbors(self, row, col):
         """
@@ -116,11 +146,11 @@ class MineSweeperBoard():
                 neighbors.append( (r, c) )
         return neighbors
 
-    def print_player_board(self):
+    def print_board(self, player=True):
         """
-        Print the player board to console, if it's a new game, print board instead
+        Print the player board if it's true, else print board with mines 
         """
-        board = self.player_board if self.first_move else self.board
+        board = self.player_board if player else self.board
         for r in range(board.shape[0]):
             row_string = ""
             for c in range(board.shape[1]):
@@ -129,5 +159,5 @@ class MineSweeperBoard():
                 else: 
                     row_string += str(board[r][c])
             print(row_string)
-                
+            
             
