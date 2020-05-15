@@ -1,0 +1,133 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed May 13 18:30:11 2020
+
+@author: Wash
+"""
+import numpy as np
+from move import Move
+import copy
+
+class MineSweeperBoard():
+    """
+    This class will handle the game state and logic in the game
+    """
+    def __init__(self, num_rows, num_cols, num_mines):
+        self.num_rows = num_rows
+        self.num_cols = num_cols
+        self.num_mines = num_mines
+    
+        self.new_game()
+    
+    def new_game(self):
+        """
+        Initialize a new game with num_rows, num_cols
+        This method does not initialize the mines yet since mines are not set until first point is selected
+        
+        -1 represents a point that has not been selected
+        0 represents no mines in its neighbor
+        1-8 represents number of mines in its neighbor
+        9 represents a mine
+        
+        board will represent the board the system sees, which contains all the bomb location
+        player_board will not contain the bomb location
+        """
+        board = np.full((self.num_rows, self.num_cols), -1)
+        self.board = board
+        self.player_board = copy.deepcopy(self.board)
+        self.first_move = False
+        
+    def select_move(self, move):
+        """
+        Player selects a move and update the board
+        
+        Initialize the bombs if that's the case
+        """
+        if not move.validate_move():
+            return
+        if not self.first_move:
+            self._initialize_mines(move)
+        else:
+            self._select_move(move)
+        
+    def _select_move(self, move):
+        """
+        Utility function that selects the move and checks with the main board to see if the move is placed on a mine
+        """
+        pass
+        
+    def _initialize_mines(self, move):
+        """
+        Initialize mines after first move
+        Makes the move with 0 mines first and then randomly place mines on the board
+        """
+        self.board[move.select_row][move.select_col] = 0
+        
+        possible_mine_locations = []
+        move_neighbors = self.neighbors(move.select_row, move.select_col)
+        
+        # All availble mine locations on the board
+        for r in range(self.num_rows):
+            for c in range(self.num_cols):
+                # Don't place mine around the neighbor of the move
+                if (r, c) in move_neighbors or (r, c) == (move.select_row, move.select_col):
+                    continue
+                possible_mine_locations.append( (r, c) )
+        
+        mine_locations_index = np.random.choice(np.arange(len(possible_mine_locations)), self.num_mines, replace=False)
+        
+        # Place mines
+        for index in mine_locations_index:
+            mine = possible_mine_locations[index]
+            r, c = mine[0], mine[1]
+            self.board[r][c] = 9
+        
+        # Update board to reflect how many bombs in its neighbor
+        for r in range(self.num_rows):
+            for c in range(self.num_cols):
+                if self.board[r][c] != -1:
+                    continue
+                
+                point_neighbors = self.neighbors(r, c)
+                mine_count = 0
+                for neighbor in point_neighbors:
+                    if self.board[neighbor[0]][neighbor[1]] == 9:
+                        mine_count += 1
+                self.board[r][c] = mine_count
+        
+        
+    def _expand_neighbors(self, row, col):
+        """
+        Utility function that will expand the board when the point player makes has 0 mines around it
+        """
+        pass
+    
+    def neighbors(self, row, col):
+        """
+        Utility function that will return a list of tuples (row, col) that are neighbors to the input row col
+        """
+        neighbors = []
+        for r in range(row-1, row+2):
+            if r >= self.num_rows or r < 0:
+                continue
+            for c in range(col-1,  col+2):
+                if c >= self.num_cols or c < 0 or (r == row and c == col):
+                    continue
+                neighbors.append( (r, c) )
+        return neighbors
+
+    def print_player_board(self):
+        """
+        Print the player board to console, if it's a new game, print board instead
+        """
+        board = self.player_board if self.first_move else self.board
+        for r in range(board.shape[0]):
+            row_string = ""
+            for c in range(board.shape[1]):
+                if board[r][c] == -1:
+                    row_string += 'o'
+                else: 
+                    row_string += str(board[r][c])
+            print(row_string)
+                
+            
