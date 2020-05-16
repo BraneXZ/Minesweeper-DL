@@ -16,7 +16,6 @@ class MineSweeperBoard():
         self.num_cols = num_cols
         self.num_mines = num_mines
         
-        self.new_game()
     
     def new_game(self):
         """
@@ -36,6 +35,7 @@ class MineSweeperBoard():
         self.player_board = copy.deepcopy(self.board)
         self.first_move = False
         self.game_over = False
+        self.explored = self.num_rows * self.num_cols - self.num_mines 
         
     def select_move(self, move):
         """
@@ -65,31 +65,33 @@ class MineSweeperBoard():
         # Reveal its val if it has mines around it
         elif board_val > 0:
             self.player_board[select_row][select_col] = board_val
+            self.explored -= 1
         
         # Expand the board if val is 0
         else:
-            reveal_locations = [(select_row, select_col)]
-            neighbors = self.neighbors(select_row, select_col)
+            reveal_locations = set([(select_row, select_col)])
+            neighbors = set(self.neighbors(select_row, select_col))
             
             while neighbors:
-                neighbor = neighbors.pop(0)
+                neighbor = neighbors.pop()
                 neighbor_row, neighbor_col = neighbor[0], neighbor[1]
                 neighbor_val = self.board[neighbor_row][neighbor_col]
                 
-                reveal_locations.append(neighbor)
+                reveal_locations.add(neighbor)
                 
                 if neighbor_val == 0:
                     neighbor_neighbors = self.neighbors(neighbor_row, neighbor_col)
                     
                     for nn in neighbor_neighbors:
-                        nn_row, nn_col = nn[0], nn[1]
-                        if (nn_row, nn_col) not in neighbors and (nn_row, nn_col) not in reveal_locations:
-                            neighbors.append( (nn_row, nn_col) )
-                            
+                        p = (nn[0], nn[1])
+                        if p not in neighbors and p not in reveal_locations:
+                            neighbors.add( p )
             for loc in reveal_locations:
                 loc_row, loc_col = loc[0], loc[1]
                 self.player_board[loc_row][loc_col] = self.board[loc_row][loc_col]
-                        
+            
+            self.explored -= len(reveal_locations)
+            
     def _initialize_mines(self, move):
         """
         Initialize mines after first move
