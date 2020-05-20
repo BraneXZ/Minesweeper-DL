@@ -5,13 +5,14 @@ Created on Tue May 19 10:45:12 2020
 @author: Wash
 """
 
-from flask import Flask, request, jsonify, render_template, redirect, abort
+from flask import Flask, request, jsonify, render_template
 import json
 import os
 import numpy as np
 
 from minesweeper_board import MineSweeperBoard
 from move import Move
+import agent
 
 app = Flask(__name__, template_folder="static")
 SECRET_KEY = os.urandom(32)
@@ -53,5 +54,22 @@ def applyMove():
     }
     
     return jsonify(response)
+
+
+@app.route('/playAgent')
+def playAgent():
+    request_agent = request.args.get('agent')
+    if request_agent == "random":
+        playing_agent = agent.random_agent.RandomBot()
+    
+    board.select_move(playing_agent.select_move(board.player_board))
+    
+    response = {
+        "board": board.player_board.tolist(),
+        "status": board.status
+    }
+    
+    return jsonify(response)
     
 app.run()
+

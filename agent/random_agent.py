@@ -8,7 +8,6 @@ Created on Wed May 20 10:03:41 2020
 import numpy as np
 
 from agent.base import Agent
-from minesweeper_board import MineSweeperBoard
 from move import Move
 
 class RandomBot(Agent):

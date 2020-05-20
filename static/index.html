@@ -12,12 +12,12 @@
     
     <div>
         <p>
-        <label for="col">Row:</label><br>
+        <label for="row">Row:</label><br>
         <input type="number" id="row" name="row" value=10><br>
         </p>
         
         <p>
-        <label for="row">Column:</label><br>
+        <label for="col">Column:</label><br>
         <input type="number" id="col" name="col" value=10><br>
         </p>
         
@@ -26,8 +26,22 @@
         <input type="number" id="mine" name="mine" value=10><br>
         </p>
         
+        <p>
         <br>
         <button id="new-game-button">New Game</button>
+        <br> <br>
+        </p>
+        
+        <p>
+        <label for="agent">Agent:</label>
+
+        <select id="agent">
+            <option value="random">Random</option>
+        </select>
+        <br>
+        <button id="agent-button">Play with Agent</button>
+        </p>
+        
         <br><br><br>
     </div>
     

@@ -102,8 +102,7 @@ class MineSweeperBoard():
                     explored += 1 
         
         non_mine_count = self.num_rows * self.num_cols - self.num_mines
-        print(explored)
-        self.print_board()
+
         if explored == non_mine_count:
             self.status = 1
             
