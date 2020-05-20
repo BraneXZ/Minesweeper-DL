@@ -84,8 +84,9 @@ class MineSweeperBoard():
                     
                     for nn in neighbor_neighbors:
                         p = (nn[0], nn[1])
-                        if p not in neighbors and p not in reveal_locations:
+                        if p not in neighbors and p not in reveal_locations and self.player_board[nn[0]][nn[1]] == -1:
                             neighbors.add( p )
+
             for loc in reveal_locations:
                 loc_row, loc_col = loc[0], loc[1]
                 self.player_board[loc_row][loc_col] = self.board[loc_row][loc_col]

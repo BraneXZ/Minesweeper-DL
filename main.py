@@ -5,7 +5,7 @@ Created on Tue May 19 10:45:12 2020
 @author: Wash
 """
 
-from flask import Flask, request, jsonify, render_template, redirect
+from flask import Flask, request, jsonify, render_template, redirect, abort
 import json
 import os
 import numpy as np
@@ -33,13 +33,20 @@ def newBoard():
     board.new_game()
     return jsonify(board.player_board.tolist())
 
-# =============================================================================
-# @app.route('/postMove', methods=['POST'])
-# def postMove():
-#     if not request.json:
-#         abort(400)
-#     test = np.array(json.loads(request.json))
-#     
-# =============================================================================
+
+@app.route('/applyMove')
+def applyMove():
+    row = int(request.args.get('row'))
+    col = int(request.args.get('col'))
+    
+    move = Move(row, col, board.player_board)
+    board.select_move(move)
+    print(board.explored)
+    
+    if board.game_over:
+        return jsonify(-1)
+    elif board.explored == 0:
+        return jsonify(1)
+    return jsonify(board.player_board.tolist())
     
 app.run()

@@ -37,5 +37,36 @@ $(document).ready(function () {
         var str = $(this).attr('id');
         var clickedXY = str.split('x');
         console.log(`${clickedXY[0]} - ${clickedXY[1]} was clicked. Str: ${str}`);
+
+        $.ajax({
+            type: 'GET',
+            url: '/applyMove',
+            data: {
+                "row": clickedXY[0],
+                "col": clickedXY[1]
+            },
+            success: function(data){
+                if (data == -1){
+                    alert('You lost nerd!');
+                }
+                else if (data == 1){
+                    alert('You win!');
+                }
+                else{
+                    $container.html('');
+                    $container.css('grid-template-columns', 'repeat(' + data[0].length + ', auto)');
+                    data.forEach(function(row, i){
+                        row.forEach(function (val, j) {
+                            var src = `"/static/minesweeper_img/${val}.png"`;
+                            $container.append(`<img id="${i}x${j}" class="unclicked" src=${src} alt="field" width="40" height="40">`);
+                        });
+                    });
+                    $container.css('visibility','visible');
+                }
+            },
+            error: function(){
+                alert('Error applying move');
+            }
+        });
     });
 });
