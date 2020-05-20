@@ -34,8 +34,7 @@ class MineSweeperBoard():
         self.board = board
         self.player_board = copy.deepcopy(self.board)
         self.first_move = False
-        self.game_over = False
-        self.explored = self.num_rows * self.num_cols - self.num_mines 
+        self.status = 0 # 0 means still playing, -1 is game over, 1 is a win
         
     def select_move(self, move):
         """
@@ -60,12 +59,11 @@ class MineSweeperBoard():
         
         # Game over if the value is a mine
         if board_val == 9:
-            self.game_over = True
-        
+            self.status = -1
+            return
         # Reveal its val if it has mines around it
         elif board_val > 0:
             self.player_board[select_row][select_col] = board_val
-            self.explored -= 1
         
         # Expand the board if val is 0
         else:
@@ -91,8 +89,25 @@ class MineSweeperBoard():
                 loc_row, loc_col = loc[0], loc[1]
                 self.player_board[loc_row][loc_col] = self.board[loc_row][loc_col]
             
-            self.explored -= len(reveal_locations)
+        self.check_game_win()
+        
+    def check_game_win(self):
+        """
+        Check the playerboard to see if all non-mine field are explored
+        """
+        explored = 0
+        for r in range(self.num_rows):
+            for c in range(self.num_cols):
+                if self.player_board[r][c] != -1:
+                    explored += 1 
+        
+        non_mine_count = self.num_rows * self.num_cols - self.num_mines
+        print(explored)
+        self.print_board()
+        if explored == non_mine_count:
+            self.status = 1
             
+        
     def _initialize_mines(self, move):
         """
         Initialize mines after first move

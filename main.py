@@ -31,7 +31,12 @@ def newBoard():
     global board
     board = MineSweeperBoard(row, col, mine)
     board.new_game()
-    return jsonify(board.player_board.tolist())
+    
+    response = {
+        "board": board.player_board.tolist(),
+        "status": board.status
+    }
+    return jsonify(response)
 
 
 @app.route('/applyMove')
@@ -41,12 +46,12 @@ def applyMove():
     
     move = Move(row, col, board.player_board)
     board.select_move(move)
-    print(board.explored)
     
-    if board.game_over:
-        return jsonify(-1)
-    elif board.explored == 0:
-        return jsonify(1)
-    return jsonify(board.player_board.tolist())
+    response = {
+        "board": board.player_board.tolist(),
+        "status": board.status
+    }
+    
+    return jsonify(response)
     
 app.run()
