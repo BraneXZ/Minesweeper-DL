@@ -15,7 +15,7 @@ class Encoder:
     def encode_move(self, move):
         raise NotImplementedError()
     
-    def decode_move_(self, move):
+    def decode_move_index(self, index):
         raise NotImplementedError()
         
     def shape(self):
@@ -23,9 +23,9 @@ class Encoder:
         
 import importlib
 
-def get_encoer_by_name(name, row, col, mine):
+def get_encoder_by_name(name, row, col, mine):
     """
-    
+    Helper function that returns an encoder object using the specified name
 
     Parameters
     ----------
