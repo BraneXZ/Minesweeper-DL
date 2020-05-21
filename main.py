@@ -6,9 +6,7 @@ Created on Tue May 19 10:45:12 2020
 """
 
 from flask import Flask, request, jsonify, render_template
-import json
 import os
-import numpy as np
 
 from minesweeper_board import MineSweeperBoard
 from move import Move
