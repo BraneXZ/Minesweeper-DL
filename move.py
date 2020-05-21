@@ -7,27 +7,41 @@ Created on Fri May 15 12:44:43 2020
 
 class Move:
     """
-    Player selects a move by row and column and the board
-    This class will also provide validation for the move
+    Player selects a move by row and column
     """
-    def __init__(self, select_row, select_col, player_board):
+    def __init__(self, select_row, select_col):
         self.select_row = select_row
         self.select_col = select_col
-        self.player_board = player_board
-        
-    def validate_move(self):
-        """
-        Validate the move
-        Move is valid as long as it is within the size of the board
-        and the selected move has -1 on the board
-        """
-        player_board_rows = self.player_board.shape[0]
-        player_board_cols = self.player_board.shape[1]
-        
-        if self.select_row >= player_board_rows or self.select_row < 0 or \
-            self.select_col >= player_board_cols or self.select_col < 0 or \
-            self.player_board[self.select_row][self.select_col] != -1:
-            return False
-        return True
+
+def validate_move(move, player_board):
+    """
+    Validate the move
+    Move is valid as long as it is within the size of the board
+    and the selected move has -1 on the board
+
+    Parameters
+    ----------
+    move : move object
+        Move selected
+    player_board : ndarray
+        Current board state
+
+    Returns
+    -------
+    bool
+        True if move is valid false otherwise
+
+    """
+    select_row = move.select_row
+    select_col = move.select_col
+    
+    player_board_rows = player_board.shape[0]
+    player_board_cols = player_board.shape[1]
+    
+    if select_row >= player_board_rows or select_row < 0 or \
+        select_col >= player_board_cols or select_col < 0 or \
+        player_board[select_row][select_col] != -1:
+        return False
+    return True
     
     

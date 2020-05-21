@@ -43,7 +43,7 @@ def applyMove():
     row = int(request.args.get('row'))
     col = int(request.args.get('col'))
     
-    move = Move(row, col, board.player_board)
+    move = Move(row, col)
     board.select_move(move)
     
     response = {

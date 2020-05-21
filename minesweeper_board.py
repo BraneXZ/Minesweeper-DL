@@ -6,6 +6,7 @@ Created on Wed May 13 18:30:11 2020
 """
 import numpy as np
 import copy
+from move import validate_move
 
 class MineSweeperBoard():
     """
@@ -42,7 +43,7 @@ class MineSweeperBoard():
         
         Initialize the bombs if that's the case
         """
-        if not move.validate_move():
+        if validate_move(move, self.player_board):
             return
         if not self.first_move:
             self._initialize_mines(move)
