@@ -55,5 +55,11 @@ class OnePlaneEncoder(Encoder):
         col = index % self.col
         return Move(row, col)
     
+    def num_points(self):
+        return self.row * self.col 
+    
     def shape(self):
         return self.num_planes, self.row, self.col
+    
+def create(row, col, mine):
+    return OnePlaneEncoder(row, col, mine)
