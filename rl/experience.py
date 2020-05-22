@@ -50,7 +50,10 @@ class ExperienceCollector:
             rewards = np.array(self.rewards)
         )
     
-
+    def reset_collector(self):
+        self.states = []
+        self.actions = []
+        self.rewards = []
         
 def load_experience(h5file):
     return ExperienceBuffer(

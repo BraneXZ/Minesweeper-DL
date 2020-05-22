@@ -6,7 +6,7 @@ Created on Thu May 21 11:05:05 2020
 """
 import h5py
 import numpy as np
-
+from keras.optimizers import SGD
 
 from agent.base import Agent
 import encoders 
@@ -17,6 +17,7 @@ class PolicyAgent(Agent):
     def __init__(self, model, encoder):
         self.model = model
         self.encoder = encoder 
+        self.collector = None
         
     def select_move(self, player_board):
         board_tensor = self.encoder.encode(player_board)
@@ -50,6 +51,17 @@ class PolicyAgent(Agent):
         
     def set_collector(self, collector):
         self.collector = collector
+
+    def train(self, experience, lr, clipnorm, batch_size):
+        self.model.compile(
+            loss = 'categorical_crossentropy',
+            optimizer = SGD(lr=lr, clipnorm=clipnorm)
+        )
+        
+        target_vectors = preprare_experience_data(experience, self.encoder.row, self.encoder.col)
+        X = np.expand_dims(experience.states, axis=1)
+        
+        self.model.fit(X, target_vectors, batch_size=batch_size, epochs=10)
         
 def clip_probs(original_probs):
     min_p = 1e-5
@@ -64,5 +76,14 @@ def load_policy_agent(h5file):
     row = h5file['encoder'].attrs['row']
     col = h5file['encoder'].attrs['col']
     mine = h5file['encoder'].attrs['mine']
-    encoder = encoders.get_encoder_by_name(encoder_name, row, col, mine)
+    encoder = encoders.base.get_encoder_by_name(encoder_name, row, col, mine)
     return PolicyAgent(model, encoder)
+
+def preprare_experience_data(experience, row, col):
+    experience_size = experience.actions.shape[0]
+    target_vectors = np.zeros((experience_size, row * col))
+    for i in range(experience_size):
+        action = experience.actions[i]
+        reward = experience.rewards[i]
+        target_vectors[i][action] = reward
+    return target_vectors
