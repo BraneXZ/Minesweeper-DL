@@ -43,7 +43,7 @@ class MineSweeperBoard():
         
         Initialize the bombs if that's the case
         """
-        if validate_move(move, self.player_board):
+        if not validate_move(move, self.player_board):
             return
         if not self.first_move:
             self._initialize_mines(move)

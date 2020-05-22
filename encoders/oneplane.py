@@ -6,6 +6,7 @@ Created on Thu May 21 11:25:29 2020
 """
 
 from encoders.base import Encoder
+from move import Move
 
 class OnePlaneEncoder(Encoder):
     def __init__(self, row, col, mine):

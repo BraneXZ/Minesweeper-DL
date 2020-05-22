@@ -12,7 +12,9 @@ class Move:
     def __init__(self, select_row, select_col):
         self.select_row = select_row
         self.select_col = select_col
-
+        
+    def __str__(self):
+        return f'Move row: {self.select_row} Move col: {self.select_col}'
 def validate_move(move, player_board):
     """
     Validate the move
