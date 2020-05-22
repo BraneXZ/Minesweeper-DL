@@ -8,7 +8,7 @@ import h5py
 import numpy as np
 from keras.optimizers import SGD
 
-from agent.base import Agent
+from agents import Agent
 import encoders 
 import move 
 import kerasutil
@@ -63,6 +63,10 @@ class PolicyAgent(Agent):
         
         self.model.fit(X, target_vectors, batch_size=batch_size, epochs=10)
         
+        
+def create(model, encoder):
+    return PolicyAgent(model, encoder)
+
 def clip_probs(original_probs):
     min_p = 1e-5
     max_p = 1 - min_p 
@@ -70,7 +74,7 @@ def clip_probs(original_probs):
     clipped_probs /= np.sum(clipped_probs)
     return clipped_probs 
 
-def load_policy_agent(h5file):
+def load(h5file):
     model = kerasutil.load_model_from_hdf5_group(h5file['model'])
     encoder_name = h5file['encoder'].attrs['name']
     row = h5file['encoder'].attrs['row']

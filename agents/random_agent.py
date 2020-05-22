@@ -7,7 +7,7 @@ Created on Wed May 20 10:03:41 2020
 
 import numpy as np
 
-from agent.base import Agent
+from agents import Agent
 from move import Move
 
 class RandomBot(Agent):
