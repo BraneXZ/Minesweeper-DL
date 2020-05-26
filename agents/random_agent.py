@@ -17,7 +17,7 @@ class RandomBot(Agent):
         for r in range(player_board.shape[0]):
             for c in range(player_board.shape[1]):
                 if player_board[r][c] == -1:
-                    move = Move(r, c, player_board)
+                    move = Move(r, c)
                     moves.append(move)
         
         return np.random.choice(moves)

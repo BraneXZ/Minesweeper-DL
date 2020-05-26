@@ -7,18 +7,20 @@ Created on Tue May 19 10:45:12 2020
 
 from flask import Flask, request, jsonify, render_template
 import os
+import h5py 
 
 from minesweeper_board import MineSweeperBoard
 from move import Move
-import agent
+import agents
 
 app = Flask(__name__, template_folder="static")
 SECRET_KEY = os.urandom(32)
 app.config['SECRET_KEY'] = SECRET_KEY
 
 board = None
+POLICY_AGENT_FILE_NAME = "policy_agent_param"
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
 
@@ -58,13 +60,19 @@ def applyMove():
 def playAgent():
     request_agent = request.args.get('agent')
     if request_agent == "random":
-        playing_agent = agent.random_agent.RandomBot()
-    
-    board.select_move(playing_agent.select_move(board.player_board))
+        playing_agent = agents.random_agent.RandomBot()
+    if request_agent == "policy":
+        with h5py.File(POLICY_AGENT_FILE_NAME, 'r') as prev_agent:
+            playing_agent = agents.load_agent_by_name("policy_agent", prev_agent)
+            
+    move = playing_agent.select_move(board.player_board)
+    board.select_move(move)
     
     response = {
         "board": board.player_board.tolist(),
-        "status": board.status
+        "status": board.status,
+        "select_row": str(move.select_row),
+        "select_col": str(move.select_col)
     }
     
     return jsonify(response)

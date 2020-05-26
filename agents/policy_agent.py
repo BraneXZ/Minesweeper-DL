@@ -38,7 +38,7 @@ class PolicyAgent(Agent):
             if move.validate_move(possible_move, player_board):
                 if self.collector is not None:
                     self.collector.record_decision(state=board_tensor, action=point_idx)
-                return possible_move        
+                return possible_move
         
     def serialize(self, h5file):
         h5file.create_group('encoder')
@@ -52,7 +52,7 @@ class PolicyAgent(Agent):
     def set_collector(self, collector):
         self.collector = collector
 
-    def train(self, experience, lr, clipnorm, batch_size):
+    def train(self, experience, lr, clipnorm, batch_size, epochs):
         self.model.compile(
             loss = 'categorical_crossentropy',
             optimizer = SGD(lr=lr, clipnorm=clipnorm)
@@ -61,7 +61,7 @@ class PolicyAgent(Agent):
         target_vectors = preprare_experience_data(experience, self.encoder.row, self.encoder.col)
         X = np.expand_dims(experience.states, axis=1)
         
-        self.model.fit(X, target_vectors, batch_size=batch_size, epochs=10)
+        self.model.fit(X, target_vectors, batch_size=batch_size, epochs=epochs)
         
         
 def create(model, encoder):

@@ -5,6 +5,7 @@ Created on Fri May 22 16:05:36 2020
 @author: Wash
 """
 import h5py
+import os 
 
 from minesweeper_board import MineSweeperBoard
 from rl import experience
@@ -20,12 +21,20 @@ def simulate_game(player, row, col, mine):
     return board.status
 
 
-def create_experience(player, model, rows, cols, mines, num_files, games_per_file):
+def create_experience(player, model, rows, cols, mines, num_files, games_per_file=10000):
     collector = experience.ExperienceCollector()
     player.set_collector(collector)
     
-    for i in range(num_files):
-        print(f'Creating file {i}/{num_files}')
+    # Determine the latest file_num and start from that number + 1
+    latest_file_num = -1
+    for file_name in os.listdir("experience"):
+        if int(file_name.split("_")[-1]) > latest_file_num:
+            latest_file_num = int(file_name.split("_")[-1])
+            
+    
+    latest_file_num += 1
+    for i in range(latest_file_num, latest_file_num + num_files):
+        print(f'Creating file {i}/{latest_file_num + num_files}')
         for _ in range(games_per_file):
             collector.begin_episode()
             

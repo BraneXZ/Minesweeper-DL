@@ -9,9 +9,9 @@ $(document).ready(function () {
     $('#agent-button').on('click', async function() {
         newGame();
         while (agent_game_status === 0){
-            await sleep(1000);
+            await sleep(500);
             playAgent();
-            console.log(agent_game_status);
+            console.log(`Current game status: ${agent_game_status}`);
         }
         agent_game_status = 0;
     });
@@ -44,6 +44,7 @@ $(document).ready(function () {
             success: function(data){
                 updateBoard(data)
                 agent_game_status = data.status;
+                console.log(`Agent select row: ${data.select_row}\nAgent select col: ${data.select_col}`)
             },
             error: function(){
                 alert("Error playing agent");
