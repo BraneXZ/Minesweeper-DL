@@ -24,7 +24,7 @@ class PolicyAgent(Agent):
         X = np.array([[board_tensor]])
         
         move_probs = self.model.predict(X)[0]
-
+        print(move_probs)
         move_probs = clip_probs(move_probs)
         
         num_moves = self.encoder.row * self.encoder.col
@@ -59,7 +59,9 @@ class PolicyAgent(Agent):
         )
         
         target_vectors = preprare_experience_data(experience, self.encoder.row, self.encoder.col)
+        
         X = np.expand_dims(experience.states, axis=1)
+        X += 10 # Adding everything by 10 so padding won't confuse the agent
         
         self.model.fit(X, target_vectors, batch_size=batch_size, epochs=epochs)
         

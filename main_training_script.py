@@ -15,14 +15,14 @@ import agents
 import rl
 
 # Change these variable values to alter the training script
-ROWS = 5 
+ROWS = 5
 COLS = 5
 MINES = 3
 
 LR = 0.001
 CLIPNORM = 1
-BATCH_SIZE = 2048
-EPOCHS = 1
+BATCH_SIZE = 512
+EPOCHS = 10
 ITERATIONS = 1
 
 ENCODER_NAME = "oneplane"
@@ -31,7 +31,7 @@ MODEL_NAME = "model1"
 
 SAVE_AGENT = True
 AGENT_FILE_NAME = "policy_agent_param2"
-LOAD_AGENT = False
+LOAD_AGENT = True
 
 
 encoder = encoders.get_encoder_by_name(ENCODER_NAME, ROWS, COLS, MINES)
@@ -48,27 +48,17 @@ else:
 
 # print("Creating 100,000 games with updated agent")
 # create_experience(agent, model, ROWS, COLS, MINES, 10)
-
-# # Only train on the latest 10 files
-# latest_file_num = -1
-# for file_name in os.listdir("experience"):
-#     if int(file_name.split("_")[-1]) > latest_file_num:
-#         latest_file_num = int(file_name.split("_")[-1])
         
-
 for i in range(ITERATIONS):
     
     print(f"Performing iteration: {i+1}")
+    num = -1
     for file_name in os.listdir("experience"):
         exp = file_name.split("_")
-        
-        # if int(exp[-1]) <= latest_file_num - 10:
-        #     continue
         
         exp_row = int(exp[0][:-1])
         exp_col = int(exp[1][:-1])
         exp_mine = int(exp[2][:-1])
-        
         
         if exp_row == ROWS and exp_col == COLS and exp_mine == MINES:
             exp_buffer = rl.experience.load_experience(h5py.File( "experience/" + file_name, 'r'))
@@ -77,7 +67,10 @@ for i in range(ITERATIONS):
             if SAVE_AGENT:
                 with h5py.File(AGENT_FILE_NAME, 'w') as updated_agent:
                     agent.serialize(updated_agent)
-                
+            num += 1
+            if num == 1:
+                break
+        
 win = 0
 for i in range(10000):
     if simulate_game(agent, ROWS, COLS, MINES) == 1:
