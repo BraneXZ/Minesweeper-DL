@@ -17,7 +17,15 @@ def simulate_game(player, row, col, mine):
     while board.status == 0:
         next_move = player.select_move(board.player_board)
         board.select_move(next_move)
-
+        
+        if player.collector is not None:
+            if board.status == -1:
+                player.collector.record_reward(- row * col)
+            elif board.status == 0:
+                player.collector.record_reward(board.reward)
+            else:
+                player.collector.record_reward(row * col)
+                
     return board.status
 
 
@@ -39,7 +47,7 @@ def create_experience(player, model, rows, cols, mines, num_files, games_per_fil
             collector.begin_episode()
             
             game_record = simulate_game(player, rows, cols, mines)
-            collector.complete_episode(reward=game_record)
+            collector.complete_episode()
             
                 
         with h5py.File(f"experience/{rows}r_{cols}c_{mines}m_{i}", 'w') as experience_outf:
