@@ -65,7 +65,8 @@ class ExperienceCollector:
         return ExperienceBuffer(
             states = np.array(self.states),
             actions = np.array(self.actions),
-            rewards = np.array(self.rewards)
+            rewards = np.array(self.rewards),
+            advantages = np.array(self.advantages)
         )
     
     def reset_collector(self):

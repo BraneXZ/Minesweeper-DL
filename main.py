@@ -13,12 +13,14 @@ from minesweeper_board import MineSweeperBoard
 from move import Move
 import agents
 
+
 app = Flask(__name__, template_folder="static")
 SECRET_KEY = os.urandom(32)
 app.config['SECRET_KEY'] = SECRET_KEY
 
 board = None
-POLICY_AGENT_FILE_NAME = "policy_agent_param"
+POLICY_AGENT_FILE_NAME = "policy_agent_param2"
+Q_LEARNING_AGENT_FILE_NAME = "q_learning_less_games_1"
 
 @app.route('/', methods=['GET'])
 def index():
@@ -61,9 +63,12 @@ def playAgent():
     request_agent = request.args.get('agent')
     if request_agent == "random":
         playing_agent = agents.random_agent.RandomBot()
-    if request_agent == "policy":
+    elif request_agent == "policy":
         with h5py.File(POLICY_AGENT_FILE_NAME, 'r') as prev_agent:
             playing_agent = agents.load_agent_by_name("policy_agent", prev_agent)
+    elif request_agent == "qlearning":
+        with h5py.File(Q_LEARNING_AGENT_FILE_NAME, 'r') as prev_agent:
+            playing_agent = agents.load_agent_by_name("q_learning_agent", prev_agent)
             
     move = playing_agent.select_move(board.player_board)
     board.select_move(move)

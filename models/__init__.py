@@ -4,5 +4,7 @@ Created on Fri May 22 16:12:02 2020
 
 @author: Wash
 """
-from .model1 import *
+from .policy_gradient_model import *
+from .action_value_model import *
 from .base import *
+from .ac_model import *

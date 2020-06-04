@@ -51,7 +51,11 @@ class QAgent(Agent):
         values = self.model.predict([board_tensors, move_vectors])
         values = values.reshape(num_moves)
         
-        ranked_moves = self.rank_moves_eps_greedy(values)
+        # Randomly choose the first move since it can never lose
+        if np.sum(player_board) == -num_moves:
+            ranked_moves = np.random.choice(np.arange(num_moves), num_moves, replace=False)
+        else: 
+            ranked_moves = self.rank_moves_eps_greedy(values)
         
         for move_idx in ranked_moves:
             decoded_move = self.encoder.decode_move_index(valid_moves[move_idx])

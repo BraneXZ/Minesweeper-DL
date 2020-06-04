@@ -32,7 +32,7 @@ class OnePlaneEncoder(Encoder):
         game_state : ndarray
             Encoded player board state
         """
-        return game_state
+        return [game_state]
 
     def encode_move(self, move):
         """
@@ -49,7 +49,7 @@ class OnePlaneEncoder(Encoder):
            Encoded move as an integer 
 
         """
-        return self.col * (move.select_row - 1) + (move.select_col - 1)
+        return self.col * (move.select_row) + (move.select_col)
 
     def decode_move_index(self, index):
         row = index // self.col

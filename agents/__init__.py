@@ -8,3 +8,4 @@ Created on Wed May 20 20:45:11 2020
 from .base import *
 from .policy_agent import *
 from .random_agent import *
+from .q_learning_agent import *

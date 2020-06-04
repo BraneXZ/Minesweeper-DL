@@ -36,6 +36,7 @@ class MineSweeperBoard():
         self.player_board = copy.deepcopy(self.board)
         self.first_move = False
         self.status = 0 # 0 means still playing, -1 is game over, 1 is a win
+        self.reward = 0 # Reward for the agent
         
     def select_move(self, move):
         """
@@ -65,7 +66,7 @@ class MineSweeperBoard():
         # Reveal its val if it has mines around it
         elif board_val > 0:
             self.player_board[select_row][select_col] = board_val
-        
+            self.reward = 1
         # Expand the board if val is 0
         else:
             reveal_locations = set([(select_row, select_col)])
@@ -89,6 +90,8 @@ class MineSweeperBoard():
             for loc in reveal_locations:
                 loc_row, loc_col = loc[0], loc[1]
                 self.player_board[loc_row][loc_col] = self.board[loc_row][loc_col]
+                
+            self.reward = len(reveal_locations)
             
         self.check_game_win()
         
@@ -162,8 +165,8 @@ class MineSweeperBoard():
                 if c >= self.num_cols or c < 0 or (r == row and c == col):
                     continue
                 neighbors.append( (r, c) )
-        return neighbors
-
+        return neighbors                
+        
     def print_board(self, player=True):
         """
         Print the player board if it's true, else print board with mines 

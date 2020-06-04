@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu May 21 11:05:05 2020
+Created on Thu May 29 11:05:05 2020
 
 @author: Wash
 """
@@ -13,7 +13,7 @@ import encoders
 import move 
 import kerasutil
 
-class PolicyAgent(Agent):
+class ACAgent(Agent):
     def __init__(self, model, encoder):
         self.model = model
         self.encoder = encoder 
@@ -23,13 +23,16 @@ class PolicyAgent(Agent):
         board_tensor = self.encoder.encode(player_board)
         X = np.array([board_tensor])
         
-        move_probs = self.model.predict(X)[0]
-
+        actions, values = self.model.predict(X)
+        move_probs = actions[0]
+        estimated_value = values[0][0]
+        
         move_probs = clip_probs(move_probs)
         
         num_moves = self.encoder.row * self.encoder.col
         candidates = np.arange(num_moves)
         
+        # Randomly choose the first move since it can never lose
         if np.sum(player_board) == -num_moves:
             ranked_moves = np.random.choice(candidates, num_moves, replace=False)
         else:
@@ -41,7 +44,7 @@ class PolicyAgent(Agent):
 
             if move.validate_move(possible_move, player_board):
                 if self.collector is not None:
-                    self.collector.record_decision(state=board_tensor, action=point_idx)
+                    self.collector.record_decision(state=board_tensor, action=point_idx, estimated_value=estimated_value)
                 return possible_move
         
     def serialize(self, h5file):
@@ -58,19 +61,27 @@ class PolicyAgent(Agent):
 
     def train(self, experience, lr, clipnorm, batch_size, epochs):
         self.model.compile(
-            loss = 'categorical_crossentropy',
-            optimizer = SGD(lr=lr, clipnorm=clipnorm)
+            loss = ['categorical_crossentropy', 'mse'],
+            optimizer = SGD(lr=lr),
+            loss_weights=[1, .5]
         )
+
+        n = experience.states.shape[0]
+        num_moves = self.encoder.num_points()
+        policy_target = np.zeros((n, num_moves))
+        value_target = np.zeros((n, ))
         
-        target_vectors = preprare_experience_data(experience, self.encoder.row, self.encoder.col)
-        
-        X = experience.states
-        
-        self.model.fit(X, target_vectors, batch_size=batch_size, epochs=epochs)
+        for i in range(n):
+            action = experience.actions[i]
+            policy_target[i][action] = experience.advantages[i]
+            reward = experience.rewards[i]
+            value_target[i] = reward
+            
+        self.model.fit(experience.states, [policy_target, value_target], batch_size=batch_size, epochs=epochs)
         
         
 def create(model, encoder):
-    return PolicyAgent(model, encoder)
+    return ACAgent(model, encoder)
 
 def clip_probs(original_probs):
     min_p = 1e-5
@@ -86,13 +97,4 @@ def load(h5file):
     col = h5file['encoder'].attrs['col']
     mine = h5file['encoder'].attrs['mine']
     encoder = encoders.base.get_encoder_by_name(encoder_name, row, col, mine)
-    return PolicyAgent(model, encoder)
-
-def preprare_experience_data(experience, row, col):
-    experience_size = experience.actions.shape[0]
-    target_vectors = np.zeros((experience_size, row * col))
-    for i in range(experience_size):
-        action = experience.actions[i]
-        reward = experience.rewards[i]
-        target_vectors[i][action] = reward
-    return target_vectors
+    return ACAgent(model, encoder)

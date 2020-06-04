@@ -7,8 +7,8 @@ Created on Fri May 22 16:53:38 2020
 
 import importlib
 
-def get_model_by_name(name, input_shape):
+def get_model_by_name(name, encoder):
     module = importlib.import_module('models.' + name)
-    layer = getattr(module, 'layers')
-    return layer(input_shape)
+    get_model = getattr(module, 'get_model')
+    return get_model(encoder)
 

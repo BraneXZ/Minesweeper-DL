@@ -15,6 +15,7 @@ class Move:
         
     def __str__(self):
         return f'Move row: {self.select_row} Move col: {self.select_col}'
+    
 def validate_move(move, player_board):
     """
     Validate the move
@@ -44,6 +45,7 @@ def validate_move(move, player_board):
         select_col >= player_board_cols or select_col < 0 or \
         player_board[select_row][select_col] != -1:
         return False
+    
     return True
     
     
