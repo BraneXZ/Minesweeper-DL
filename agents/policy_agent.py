@@ -19,6 +19,7 @@ class PolicyAgent(Agent):
         self.model = model
         self.encoder = encoder 
         self.collector = None
+        self.temperature = 0
         
     def select_move(self, player_board):
         board_tensor = self.encoder.encode(player_board)
@@ -31,7 +32,7 @@ class PolicyAgent(Agent):
         num_moves = self.encoder.row * self.encoder.col
         candidates = np.arange(num_moves)
         
-        if np.sum(player_board) == -num_moves:
+        if np.sum(player_board) == -num_moves or np.random.random() < self.temperature:
             ranked_moves = np.random.choice(candidates, num_moves, replace=False)
         else:
             ranked_moves = np.random.choice(candidates, num_moves, replace=False, p=move_probs)
@@ -68,6 +69,9 @@ class PolicyAgent(Agent):
         X = experience.states
 
         self.model.fit(X, target_vectors, batch_size=batch_size, epochs=epochs)
+        
+    def set_temperature(self, temperature):
+        self.temperature = temperature
         
         
 def create(model, encoder):

@@ -23,11 +23,11 @@ CLIPNORM = 1
 BATCH_SIZE = 512
 EPOCHS = 1
 ITERATIONS = 1
-TEMPERATURE = 0             
+TEMPERATURE = .2
 
 NUM_GAMES = BATCH_SIZE * 10
 
-ENCODER_NAME = "oneplane"
+ENCODER_NAME = "twoplane"
 AGENT_NAME = "policy_agent"
 MODEL_NAME = "policy_gradient_model"
 
@@ -46,16 +46,16 @@ if LOAD_AGENT:
         agent = agents.load_agent_by_name(AGENT_NAME, prev_agent)
 else:
     agent = agents.get_agent_by_name(AGENT_NAME, model, encoder)
-
-if TEMPERATURE:
-    agent.set_temperature(TEMPERATURE)
     
         
 while True:
     print(f"Creating {NUM_GAMES} games")
     create_experience(agent, model, ROWS, COLS, MINES, 1, NUM_GAMES)
-    
+    if TEMPERATURE:
+        agent.set_temperature(TEMPERATURE)
+        
     for file_name in os.listdir("experience"):
+        
         exp = file_name.split("_")
         
         exp_row = int(exp[0][:-1])
@@ -66,10 +66,12 @@ while True:
             exp_buffer = rl.experience.load_experience(h5py.File( "experience/" + file_name, 'r'))
             agent.train(exp_buffer, lr=LR, clipnorm=CLIPNORM, batch_size=BATCH_SIZE, epochs=EPOCHS)
             
-        # os.remove("experience/" + file_name)
+        os.remove("experience/" + file_name)
     
     win = 0
     for _ in range(NUM_GAMES//10):
+        agent.set_temperature(0)
+        
         if _ % (NUM_GAMES // 10) == 0:
             print(f"Simulating game {_}/{NUM_GAMES//10} to test updated agent")
         if simulate_game(agent, ROWS, COLS, MINES) == 1:
