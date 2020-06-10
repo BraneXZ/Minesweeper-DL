@@ -14,7 +14,7 @@ class TwoPlaneEncoder(Encoder):
         self.row = row
         self.col = col
         self.mine = mine
-        self.num_plane = 2
+        self.num_planes = 2
         
     def name(self):
         return 'twoplane'
