@@ -20,11 +20,9 @@ def simulate_game(player, row, col, mine):
         
         if player.collector is not None:
             if board.status == -1:
-                player.collector.record_reward(- row * col)
-            elif board.status == 0:
-                player.collector.record_reward(board.reward)
+                player.collector.record_reward(-1)
             else:
-                player.collector.record_reward(row * col)
+                player.collector.record_reward(1)
                 
     return board.status
 
@@ -42,8 +40,10 @@ def create_experience(player, model, rows, cols, mines, num_files, games_per_fil
     
     latest_file_num += 1
     for i in range(latest_file_num, latest_file_num + num_files):
-        print(f'Creating file {i}/{latest_file_num + num_files}')
         for _ in range(games_per_file):
+            if _ % (games_per_file // 10) == 0:
+                print(f"Simulating game {_}/{games_per_file}")
+                
             collector.begin_episode()
             
             game_record = simulate_game(player, rows, cols, mines)

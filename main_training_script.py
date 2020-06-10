@@ -20,16 +20,18 @@ MINES = 3
 
 LR = .01
 CLIPNORM = 1
-BATCH_SIZE = 16
+BATCH_SIZE = 512
 EPOCHS = 1
 ITERATIONS = 1
-TEMPERATURE = 0
+TEMPERATURE = 0             
+
+NUM_GAMES = BATCH_SIZE * 10
 
 ENCODER_NAME = "oneplane"
 AGENT_NAME = "policy_agent"
 MODEL_NAME = "policy_gradient_model"
 
-AGENT_FILE_NAME = "q_learning_less_games_1"
+AGENT_FILE_NAME = "policy_param_512_batch_1_layers"
 LOAD_AGENT = False
 SAVE_AGENT = True
 
@@ -50,8 +52,8 @@ if TEMPERATURE:
     
         
 while True:
-    print("Creating 100 games with updated agent")
-    create_experience(agent, model, ROWS, COLS, MINES, 1, 100)
+    print(f"Creating {NUM_GAMES} games")
+    create_experience(agent, model, ROWS, COLS, MINES, 1, NUM_GAMES)
     
     for file_name in os.listdir("experience"):
         exp = file_name.split("_")
@@ -64,20 +66,23 @@ while True:
             exp_buffer = rl.experience.load_experience(h5py.File( "experience/" + file_name, 'r'))
             agent.train(exp_buffer, lr=LR, clipnorm=CLIPNORM, batch_size=BATCH_SIZE, epochs=EPOCHS)
             
-        os.remove("experience/" + file_name)
+        # os.remove("experience/" + file_name)
     
     win = 0
-    for _ in range(100):
+    for _ in range(NUM_GAMES//10):
+        if _ % (NUM_GAMES // 10) == 0:
+            print(f"Simulating game {_}/{NUM_GAMES//10} to test updated agent")
         if simulate_game(agent, ROWS, COLS, MINES) == 1:
             win += 1
 
-    print(f'New updated agent win rate: {win}/100\n')     
+    print(f'New updated agent win rate: {win/ (NUM_GAMES//10) }%\n')     
     
-    if CUR_WINS < win and SAVE_AGENT:
-        CUR_WINS = win
-        
+    # if CUR_WINS < win and SAVE_AGENT:
+    #     CUR_WINS = win
+    
+    if SAVE_AGENT:
         with h5py.File(AGENT_FILE_NAME, 'w') as updated_agent:
             agent.serialize(updated_agent)
             
-    with h5py.File(AGENT_FILE_NAME, 'r') as prev_agent:
-        agent = agents.load_agent_by_name(AGENT_NAME, prev_agent)
+    # with h5py.File(AGENT_FILE_NAME, 'r') as prev_agent:
+    #     agent = agents.load_agent_by_name(AGENT_NAME, prev_agent)

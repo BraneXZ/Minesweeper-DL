@@ -6,7 +6,8 @@ Created on Thu May 21 11:05:05 2020
 """
 import h5py
 import numpy as np
-from keras.optimizers import SGD
+
+from keras.optimizers import SGD, Adam, Adagrad, Adadelta, RMSprop
 
 from agents import Agent
 import encoders 
@@ -41,7 +42,7 @@ class PolicyAgent(Agent):
 
             if move.validate_move(possible_move, player_board):
                 if self.collector is not None:
-                    self.collector.record_decision(state=board_tensor, action=point_idx)
+                    self.collector.record_decision(state=np.copy(board_tensor), action=point_idx)
                 return possible_move
         
     def serialize(self, h5file):
@@ -59,13 +60,13 @@ class PolicyAgent(Agent):
     def train(self, experience, lr, clipnorm, batch_size, epochs):
         self.model.compile(
             loss = 'categorical_crossentropy',
-            optimizer = SGD(lr=lr, clipnorm=clipnorm)
+            optimizer = Adam()
         )
         
         target_vectors = preprare_experience_data(experience, self.encoder.row, self.encoder.col)
         
         X = experience.states
-        
+
         self.model.fit(X, target_vectors, batch_size=batch_size, epochs=epochs)
         
         
